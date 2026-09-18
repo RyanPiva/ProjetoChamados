@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root123
+          MYSQL_USER: chamados
+          MYSQL_PASSWORD: chamados123
+          MYSQL_DATABASE: chamados
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -u chamados -pchamados123"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar Prisma Client
+        run: npm run prisma:generate --workspace=apps/Back
+        env:
+          DATABASE_URL: mysql://chamados:chamados123@localhost:3306/chamados
+
+      - name: Rodar migrations
+        run: npx prisma migrate deploy --schema=apps/Back/prisma/schema.prisma
+        env:
+          DATABASE_URL: mysql://chamados:chamados123@localhost:3306/chamados
+
+      - name: Build Back
+        run: npm run build:back
+
+      - name: Build Front
+        run: npm run build:front
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_PUBLIC_WS_URL: ws://localhost:3001

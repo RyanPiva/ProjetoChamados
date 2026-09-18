@@ -1,0 +1,72 @@
+services:
+  mysql:
+    image: mysql:8
+    container_name: chamados-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_USER: ${MYSQL_USER:-chamados}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-chamados123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-chamados}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${MYSQL_USER:-chamados}", "-p${MYSQL_PASSWORD:-chamados123}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: chamados-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  api:
+    build:
+      context: ./apps/Back
+      dockerfile: Dockerfile
+    container_name: chamados-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-mysql://chamados:chamados123@mysql:3306/chamados}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      PORT: ${API_PORT:-3001}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      JWT_SECRET: ${JWT_SECRET:-troque-por-um-segredo-forte}
+    ports:
+      - "3001:3001"
+
+  web:
+    build:
+      context: ./apps/Front
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+        NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:3001}
+    container_name: chamados-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-ws://localhost:3001}
+      PORT: ${WEB_PORT:-3000}
+    ports:
+      - "3000:3000"
+
+volumes:
+  mysql_data:
+  redis_data:
+

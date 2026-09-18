@@ -1,0 +1,29 @@
+{
+  "name": "chamados",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de chamados/tickets empresarial",
+  "scripts": {
+    "fronteback": "concurrently \"npm run dev:back\" \"npm run dev:front\"",
+    "dev:back": "npm run dev --workspace=apps/Back",
+    "dev:front": "npm run dev --workspace=apps/Front",
+    "build:back": "npm run build --workspace=apps/Back",
+    "build:front": "npm run build --workspace=apps/Front",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:build": "docker compose build",
+    "db:migrate": "npm run prisma:migrate --workspace=apps/Back",
+    "db:studio": "npm run prisma:studio --workspace=apps/Back"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "dependencies": {
+    "@nestjs/jwt": "^11.0.2",
+    "bcryptjs": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "concurrently": "^10.0.5"
+  }
+}
