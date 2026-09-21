@@ -1,20 +1,33 @@
  'use client';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
+import { getCurrentUser } from '@/lib/auth';
 import type { Ticket, TicketStats } from '@/types';
 import { StatCard, PageTitle, Button } from '@/components/UI';
 import { TicketCard } from '@/components/TicketCard';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [stats, setStats] = useState<TicketStats | null>(null);
   const [tickets, setTickets] = useState<Ticket[]>([]);
+
   useEffect(() => {
+    const user = getCurrentUser();
+    if (user?.role === 'USER') {
+      router.replace('/tickets/new');
+      return;
+    }
+
     Promise.all([api.getStats(), api.getTickets()]).then(([nextStats, nextTickets]) => {
       setStats(nextStats);
       setTickets(nextTickets);
     });
-  }, []);
+  }, [router]);
+
+  const user = getCurrentUser();
+  if (user?.role === 'USER') return <p className="text-muted">Redirecionando...</p>;
   if (!stats) return <p className="text-muted">Carregando...</p>;
 
   return (

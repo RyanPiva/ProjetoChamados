@@ -47,8 +47,8 @@ export default function TicketsPage() {
   return (
     <div>
       <PageTitle
-        title="Chamados"
-        subtitle="Gerencie todos os tickets da empresa"
+        title="Meus chamados"
+        subtitle="Acompanhe apenas os tickets que você abriu"
         action={
           <Link href="/tickets/new">
             <Button>Novo chamado</Button>

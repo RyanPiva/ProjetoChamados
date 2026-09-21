@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { getToken } from '@/lib/auth';
+import { getCurrentUser, getToken } from '@/lib/auth';
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -14,8 +14,19 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       setReady(true);
       return;
     }
-    if (!getToken()) router.replace('/login');
-    else setReady(true);
+
+    const user = getCurrentUser();
+    if (user?.role === 'USER' && pathname === '/') {
+      router.replace('/tickets/new');
+      return;
+    }
+
+    if (!getToken()) {
+      router.replace('/login');
+      return;
+    }
+
+    setReady(true);
   }, [pathname, router]);
 
   return ready ? children : <p className="p-8 text-muted">Verificando acesso...</p>;

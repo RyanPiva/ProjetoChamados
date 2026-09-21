@@ -25,7 +25,6 @@ export default function NewTicketPage() {
         title: form.get('title') as string,
         description: form.get('description') as string,
         priority: form.get('priority') as TicketPriority,
-        category: (form.get('category') as string) || undefined,
       });
       router.push(`/tickets/${ticket.id}`);
     } catch {
@@ -50,15 +49,13 @@ export default function NewTicketPage() {
           placeholder="Descreva o problema com detalhes..."
         />
 
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Select name="priority" label="Prioridade" defaultValue="MEDIUM">
-            <option value="LOW">Baixa</option>
-            <option value="MEDIUM">Média</option>
-            <option value="HIGH">Alta</option>
-            <option value="URGENT">Urgente</option>
+        <div className="grid gap-5 sm:grid-cols-1">
+          <Select name="priority" label="Setor" defaultValue="LOW">
+            <option value="LOW">Administrativo</option>
+            <option value="MEDIUM">Financeiro</option>
+            <option value="HIGH">RH</option>
+            <option value="URGENT">Operações</option>
           </Select>
-
-          <Input name="category" label="Categoria" placeholder="Ex: Hardware, Rede, Software" />
         </div>
 
         <p className="text-sm text-muted">Solicitante: <span className="text-slate-200">{user?.name}</span></p>

@@ -152,12 +152,6 @@ export default function TicketDetailPage() {
               <dt className="text-muted">Prioridade</dt>
               <dd><PriorityBadge priority={ticket.priority} /></dd>
             </div>
-            {ticket.category && (
-              <div className="flex justify-between">
-                <dt className="text-muted">Categoria</dt>
-                <dd className="text-white">{ticket.category}</dd>
-              </div>
-            )}
             <div className="flex justify-between">
               <dt className="text-muted">Criado em</dt>
               <dd className="text-white">{new Date(ticket.createdAt).toLocaleDateString('pt-BR')}</dd>
